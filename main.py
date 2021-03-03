@@ -1,19 +1,3 @@
-'''
-Todos:
--color me pretty
-  -in this case the entangle function returns
-   multiple values that could be adambit'd up.
-   use this to determine color values
--set initial state during runtime
--set demiverse size in runtime
--make the program less fragile in the loading phase
--support window resizing
--save and load demiverses from file
--have a lovely cup of tea
--optimize!!!! Jesus!  Employ the graphics card somehow?
--on a graphics related note, add a third spatial dimension
-'''
-
 import chunkspace
 import elementa
 import pygame

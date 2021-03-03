@@ -1,3 +1,7 @@
+#playback controls: space to pause and play, right for forward, left for backward
+#automatically goes from start to finish then back from finish to start, and so on
+
+
 import chunkspace
 import elementa
 import pygame
@@ -7,8 +11,8 @@ SCREEN_WIDTH = 500
 SCREEN_HEIGHT = 500
 
 FRAME_RATE = 10
-VOXELS_X = int(SCREEN_WIDTH / 5)
-VOXELS_Y = int(SCREEN_HEIGHT / 5)
+VOXELS_X = int(SCREEN_WIDTH / 10)
+VOXELS_Y = int(SCREEN_HEIGHT / 10)
 VOXELS_T = 100
 
 def conway(vals):
@@ -75,7 +79,11 @@ def main():
             for j in range(crapspace.long):
                 currx = i * coordmultX
                 curry = j * coordmultY
-                bitcol = (200,200,200) if crapspace.getValue(i,j,mover).observe() else (0,0,0)
+                red = int(crapspace.getValue(i,j,mover).getprobamp(1) * 255)
+                green = int(crapspace.getValue(i,j,mover-1).getprobamp(1) * 255)
+                blue = int(crapspace.getValue(i,j,mover+1).getprobamp(1) * 255)
+                falseColor = red = int(crapspace.getValue(i,j,mover).getprobamp(0) * 255)
+                bitcol = (red,green,blue) if crapspace.getValue(i,j,mover).observe() else (falseColor,falseColor,falseColor)
                 pygame.draw.rect(screen,bitcol,(currx,curry,coordmultX,coordmultY))
 
         framecounter = font.render(str(mover), True, (255,0,0)) #for counting frames

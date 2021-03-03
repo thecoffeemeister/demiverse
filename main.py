@@ -26,14 +26,9 @@ def tangledup(vals):
     return elementa.Adambit(tangles[0])
 
 def main():
-    pygame.init() #start pygame
-    screen = pygame.display.set_mode([SCREEN_WIDTH,SCREEN_HEIGHT]) #set screen dimensions
-    pygame.display.set_caption('Chunks in spaaaace!') #set screen title
     crapspace = chunkspace.ChunkSpace(VOXELS_X,VOXELS_Y,VOXELS_T,elementa.Adambit(0)) #create size of demiverse
-    tock = pygame.time.Clock() #time keeping for animation
-    font = pygame.font.SysFont(None,24) #font object for displaying text
 
-    #setting the initial state
+    #setting the initial state to random
     for i in range(crapspace.wide):
         for j in range(crapspace.long):
             crapspace.setValue(i,j,0,elementa.Adambit(random.uniform(0,1)))
@@ -42,6 +37,13 @@ def main():
     print ("Loading!!!")
     crapspace.applyRules(tangledup,1)
     print("\nDone Been Loaded!!! Yeehaw!!! *shoots pistols in air* Yipee Kai Yay Motherfucker!!!")
+
+    #start pygame
+    pygame.init()
+    screen = pygame.display.set_mode([SCREEN_WIDTH,SCREEN_HEIGHT]) #set screen dimensions
+    pygame.display.set_caption('Chunks in spaaaace!') #set screen title
+    tock = pygame.time.Clock() #time keeping for animation
+    font = pygame.font.SysFont(None,24) #font object for displaying text
 
     looper = True #main program loop exit flag
     mover = 0 #animator

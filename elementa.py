@@ -11,7 +11,7 @@ class Adambit:
             inBitVal = 1
         if inBitVal < 0:
             inBitVal = 0
-            
+
         self.bitVal = inBitVal
 
     def observe(self):

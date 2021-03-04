@@ -1,4 +1,5 @@
 import elementa
+import png
 
 class ChunkSpace:
     def __init__(self,w,l,t,fillValue):
@@ -49,3 +50,19 @@ class ChunkSpace:
                     localValues = [self.getValue(acord[0],acord[1],acord[2]) for acord in localCoords]
                     self.spacemat[x][y][t] = rules(localValues)
             t += 1
+
+    def saveToPics(self,path):
+        for t in range(self.time):
+            pngArray = []
+            for y in range(self.long):
+                pngArray.append([])
+                for x in range(self.wide):
+                    if self.getValue(x,y,t).observe():
+                        pngArray[y].append(int(self.getValue(x,y,t-1).getprobamp(1) * 255))
+                        pngArray[y].append(int(self.getValue(x,y,t).getprobamp(1) * 255))
+                        pngArray[y].append(int(self.getValue(x,y,t+1).getprobamp(1) * 255))
+                    else:
+                        pngArray[y].append(int(self.getValue(x,y,t).getprobamp(0) * 255))
+                        pngArray[y].append(int(self.getValue(x,y,t).getprobamp(0) * 255))
+                        pngArray[y].append(int(self.getValue(x,y,t).getprobamp(0) * 255))
+            png.from_array(pngArray,'RGB').save(path + str(t) + ".png")

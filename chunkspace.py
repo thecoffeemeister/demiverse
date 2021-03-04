@@ -18,14 +18,21 @@ class ChunkSpace:
             if (x >= 0) and ((y >= 0) and (t >= 0)):
                 return self.spacemat[x][y][t]
         return self.fill
-    def locality(self,x,y,t,n):
+    def locality(self,x,y,t,n,pastOnly):
         coords = []
+
+        if pastOnly:
+            for i in range(3 * n):
+                for j in range(3 * n):
+                    coords.append([x+(j-n),y+(i-n),t-n])
+            return coords
+
         for i in range(3 * n):
             for j in range(3 * n):
                 for k in range(3 * n):
                     coords.append([x+(k-n),y+(j-n),t+(i-n)])
         return coords
-    def applyRules(self,rules,n):
+    def applyRules(self,rules,n,pastOnly=False):
         retval = []
 
         print ('┌', end='',flush='True') #load meter
@@ -38,7 +45,7 @@ class ChunkSpace:
             print ('█', end='',flush='True') #load meter
             for x in range(self.wide):
                 for y in range(self.long):
-                    localCoords = self.locality(x,y,t,n)
+                    localCoords = self.locality(x,y,t,n,pastOnly)
                     localValues = [self.getValue(acord[0],acord[1],acord[2]) for acord in localCoords]
                     self.spacemat[x][y][t] = rules(localValues)
             t += 1

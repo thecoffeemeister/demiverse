@@ -10,9 +10,9 @@ import random
 SCREEN_WIDTH = 500
 SCREEN_HEIGHT = 500
 
-FRAME_RATE = 10
-VOXELS_X = int(SCREEN_WIDTH / 10)
-VOXELS_Y = int(SCREEN_HEIGHT / 10)
+FRAME_RATE = 30
+VOXELS_X = int(SCREEN_WIDTH / 5)
+VOXELS_Y = int(SCREEN_HEIGHT / 5)
 VOXELS_T = 100
 
 def conway(vals):
@@ -26,7 +26,7 @@ def conway(vals):
     return elementa.Adambit(0)
 
 def tangledup(vals):
-    tangles = elementa.entangle([vals[0],vals[1],vals[2],vals[3]])
+    tangles = elementa.entangle([vals[1],vals[2],vals[3]])
     return elementa.Adambit(tangles[0])
 
 def main():
@@ -39,7 +39,7 @@ def main():
 
     #loading the demiverse according to the rules and inital state
     print ("Loading!!!")
-    crapspace.applyRules(tangledup,1)
+    crapspace.applyRules(tangledup,1,True)
     print("\nDone Been Loaded!!! Yeehaw!!! *shoots pistols in air* Yipee Kai Yay Motherfucker!!!")
 
     #start pygame

@@ -14,10 +14,10 @@ SCREEN_WIDTH = 500
 SCREEN_HEIGHT = 500
 WINDOW_TITTY = "Chunks in spaaaace!"
 
-FRAME_RATE = 30
-VOXELS_X = 50 #int(SCREEN_WIDTH / 5)
-VOXELS_Y = 50 #int(SCREEN_HEIGHT / 5)
-VOXELS_T = 10
+FRAME_RATE = 10
+VOXELS_X = 100
+VOXELS_Y = 100
+VOXELS_T = 50
 
 HELP = '''A cellular automata made sweet sweet love to something
 a little like a qubit, but not really.
@@ -47,7 +47,7 @@ def conway(vals):
 
 #sample rules using elementa functions
 def tangledup(vals):
-    tangles = elementa.entangle(vals)
+    tangles = elementa.entangle([vals[0],vals[1],vals[2],vals[3]])
     return elementa.Adambit(tangles[0])
 
 def loadPngArray(path):
@@ -59,7 +59,7 @@ def loadPngArray(path):
 
 def displayFromPng(pngarray):
     pygame.init()
-    screen = pygame.display.set_mode([SCREEN_WIDTH,SCREEN_HEIGHT]) #set screen dimensions
+    screen = pygame.display.set_mode([SCREEN_WIDTH,SCREEN_HEIGHT],pygame.RESIZABLE) #set screen dimensions
     pygame.display.set_caption(WINDOW_TITTY) #set screen title
     tock = pygame.time.Clock() #time keeping for animation
     font = pygame.font.SysFont(None,24) #font object for displaying text
@@ -74,6 +74,8 @@ def displayFromPng(pngarray):
         for event in pygame.event.get():
             if event.type == pygame.QUIT: #check for quit window event and kills program
                 looper = False
+            if event.type == pygame.VIDEORESIZE:
+                pngarray = [pygame.transform.scale(pickywick,(event.w,event.h)) for pickywick in pngarray]
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
                     if movestep == 0:
@@ -103,7 +105,7 @@ def displayFromPng(pngarray):
 def displayFromChunks(crapspace):
     #start pygame
     pygame.init()
-    screen = pygame.display.set_mode([SCREEN_WIDTH,SCREEN_HEIGHT]) #set screen dimensions
+    screen = pygame.display.set_mode([SCREEN_WIDTH,SCREEN_HEIGHT],pygame.RESIZABLE) #set screen dimensions
     pygame.display.set_caption(WINDOW_TITTY) #set screen title
     tock = pygame.time.Clock() #time keeping for animation
     font = pygame.font.SysFont(None,24) #font object for displaying text
@@ -112,12 +114,15 @@ def displayFromChunks(crapspace):
     mover = 0 #animator
     movestep = 1 #used to manage playback
     oldstep = 1
+    scrSize = (SCREEN_WIDTH,SCREEN_HEIGHT)
     #main program loop
     while looper:
         #event checker
         for event in pygame.event.get():
             if event.type == pygame.QUIT: #check for quit window event and kills program
                 looper = False
+            if event.type == pygame.VIDEORESIZE:
+                scrSize = (event.w, event.h)
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
                     if movestep == 0:
@@ -132,8 +137,8 @@ def displayFromChunks(crapspace):
         screen.fill((255,255,255)) #white background
 
         #tiles space
-        coordmultX = SCREEN_WIDTH / crapspace.wide
-        coordmultY = SCREEN_HEIGHT / crapspace.long
+        coordmultX = scrSize[0] / crapspace.wide
+        coordmultY = scrSize[1] / crapspace.long
         for i in range(crapspace.wide):
             for j in range(crapspace.long):
                 currx = i * coordmultX

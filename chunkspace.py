@@ -53,6 +53,7 @@ class ChunkSpace:
 
     def saveToPics(self,path):
         for t in range(self.time):
+            print ('█', end='',flush='True') #load meter
             pngArray = []
             for y in range(self.long):
                 pngArray.append([])

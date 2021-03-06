@@ -163,6 +163,35 @@ def displayFromChunks(crapspace):
         mover += movestep
     pygame.quit() #yo mama so fat
 
+def setGlobalProperties(fromchunks=True):
+    global SCREEN_WIDTH
+    SCREEN_WIDTH = int(input("Screen Width?: "))
+    global SCREEN_HEIGHT
+    SCREEN_HEIGHT = int(input("Screen Height?: "))
+    if fromchunks:
+        xsize = int(input("Pixels per Voxel in Width? :"))
+        while xsize <= 0:
+            xsize = int(input("WRONG! BAD DOG! BAD BAD BAD!!!\nX Size?: "))
+        global VOXELS_X
+        VOXELS_X = int(SCREEN_WIDTH / xsize)
+        ysize = int(input("Pixels per Voxel in length? :"))
+        while ysize <= 0:
+            ysize = int(input("WRONG! BAD DOG! BAD BAD BAD!!!\nY Size?: "))
+        global VOXELS_Y
+        VOXELS_Y = int(SCREEN_HEIGHT / ysize)
+        fsize = int(input("Framerate? :"))
+        while fsize <= 0:
+            fsize = int(input("WRONG! BAD DOG! BAD BAD BAD!!!\nFramerate?: "))
+        global FRAME_RATE
+        FRAME_RATE = fsize
+        tsize = int(input("How Long shall this demiverse last, in seconds?: "))
+        while tsize <= 0:
+            tsize = int(input("WRONG! BAD DOG! BAD BAD BAD!!!\nT Size?: "))
+        tsize = tsize * fsize
+        global VOXELS_T
+        VOXELS_T = tsize
+    print("...loading window...")
+
 def main():
     if '--help' in sys.argv:
         print(HELP)
@@ -177,9 +206,11 @@ def main():
             argpath = sys.argv[i+1]
             if argpath[-1] != '/':
                 argpath += '/'
+            setGlobalProperties(False)
             displayFromPng(loadPngArray(argpath))
             exit()
 
+    setGlobalProperties()
     #setting the initial state to random
     crapspace = chunkspace.ChunkSpace(VOXELS_X,VOXELS_Y,VOXELS_T,elementa.Adambit(0)) #create size of demiverse
     for i in range(crapspace.wide):

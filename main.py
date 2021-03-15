@@ -1,6 +1,9 @@
 #playback controls: space to pause and play, right for forward, left for backward
 #automatically goes from start to finish then back from finish to start, and so on
 
+#I wonder if I should make the rules themselves output three seperate values for
+#colorization
+
 
 import chunkspace
 import elementa
@@ -9,6 +12,8 @@ import random
 import png
 import sys
 import os
+from time import time
+import multiprocessing as mp
 
 SCREEN_WIDTH = 500
 SCREEN_HEIGHT = 500
@@ -47,8 +52,15 @@ def conway(vals):
 
 #sample rules using elementa functions
 def tangledup(vals):
-    tangles = elementa.entangle([vals[0],vals[1],vals[2],vals[3]])
-    return elementa.Adambit(tangles[0])
+    valLen = len(vals) if (len(vals) % 2) == 0 else len(vals) - 1
+    oldtangle = None
+    for i in range(0,valLen,2):
+        if not oldtangle:
+            oldtangle = elementa.twotangle(vals[i],vals[i+1])
+        else:
+            newtangle = elementa.twotangle(vals[i],vals[i+1])
+            oldtangle = [og * ng for og,ng in zip(oldtangle,newtangle)]
+    return elementa.Adambit(oldtangle[1])
 
 def loadPngArray(path):
     if path[-1] != '/':
@@ -143,9 +155,9 @@ def displayFromChunks(crapspace):
             for j in range(crapspace.long):
                 currx = i * coordmultX
                 curry = j * coordmultY
-                red = int(crapspace.getValue(i,j,mover).getprobamp(1) * 255)
-                green = int(crapspace.getValue(i,j,mover-1).getprobamp(1) * 255)
-                blue = int(crapspace.getValue(i,j,mover+1).getprobamp(1) * 255)
+                red = int(crapspace.getValue(i-1,j,mover).getprobamp(1) * 255)
+                green = int(crapspace.getValue(i,j-1,mover).getprobamp(1) * 255)
+                blue = int(crapspace.getValue(i,j,mover-1).getprobamp(1) * 255)
                 falseColor = int(crapspace.getValue(i,j,mover).getprobamp(0) * 255)
                 bitcol = (red,green,blue) if crapspace.getValue(i,j,mover).observe() else (falseColor,falseColor,falseColor)
                 pygame.draw.rect(screen,bitcol,(currx,curry,coordmultX,coordmultY))
@@ -219,8 +231,17 @@ def main():
 
     #loading the demiverse according to the rules and inital state
     print ("Loading!!!")
-    crapspace.applyRules(conway,1,True)
-    print("\nDone Been Loaded!!! Yeehaw!!! *shoots pistols in air* Yipee Kai Yay Motherfucker!!!")
+    loadtime = time()
+    if '--mp' in sys.argv:
+        halfwide = int(crapspace.wide / 2)
+        firsthalf = mp.Process(target=crapspace.applyRules,args=(conway,True,(0,halfwide),None,))
+        firsthalf.start()
+        crapspace.applyRules(conway,True,(halfwide,crapspace.wide),None)
+        firsthalf.join()
+    else:
+        crapspace.applyRules(conway,True,None,None)
+    loadtime = time() - loadtime
+    print("\nAll Loaded Up. And it only took", loadtime, "seconds!\n...jesus...")
 
     for i in range(len(sys.argv)):
         if (sys.argv[i] == '--save') and (len(sys.argv) >= (i+2)):

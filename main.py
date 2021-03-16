@@ -68,18 +68,20 @@ def tangledup(vals):
 
 def gravity(vals):
     summer = 0
+    g = 4
     for val in vals:
         summer += val.observe()
-    if summer > 4:
+    if summer > g:
         return elementa.Adambit(1)
     else:
         return elementa.Adambit(0)
 
 def abitgravity(vals):
     summer = 0
+    g = 2.5
     for val in vals:
         summer += val.getprobamp(1)
-    if summer > 2.5:
+    if summer > g:
         return elementa.Adambit(summer / len(vals))
     else:
         return elementa.Adambit(summer / (len(vals) * 2))

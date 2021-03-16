@@ -1,3 +1,7 @@
+##conway
+##tangledup
+##gravity
+##abitgravity
 #playback controls: space to pause and play, right for forward, left for backward
 #automatically goes from start to finish then back from finish to start, and so on
 
@@ -61,6 +65,24 @@ def tangledup(vals):
             newtangle = elementa.twotangle(vals[i],vals[i+1])
             oldtangle = [og * ng for og,ng in zip(oldtangle,newtangle)]
     return elementa.Adambit(oldtangle[1])
+
+def gravity(vals):
+    summer = 0
+    for val in vals:
+        summer += val.observe()
+    if summer > 4:
+        return elementa.Adambit(1)
+    else:
+        return elementa.Adambit(0)
+
+def abitgravity(vals):
+    summer = 0
+    for val in vals:
+        summer += val.getprobamp(1)
+    if summer > 2.5:
+        return elementa.Adambit(summer / len(vals))
+    else:
+        return elementa.Adambit(summer / (len(vals) * 2))
 
 def loadPngArray(path):
     if path[-1] != '/':
@@ -155,11 +177,10 @@ def displayFromChunks(crapspace):
             for j in range(crapspace.long):
                 currx = i * coordmultX
                 curry = j * coordmultY
-                red = int(crapspace.getValue(i-1,j,mover).getprobamp(1) * 255)
-                green = int(crapspace.getValue(i,j-1,mover).getprobamp(1) * 255)
-                blue = int(crapspace.getValue(i,j,mover-1).getprobamp(1) * 255)
-                falseColor = int(crapspace.getValue(i,j,mover).getprobamp(0) * 255)
-                bitcol = (red,green,blue) if crapspace.getValue(i,j,mover).observe() else (falseColor,falseColor,falseColor)
+                red = int(crapspace.getValue(i,j,mover-1).getprobamp(1) * 255)
+                green = int(crapspace.getValue(i,j,mover).getprobamp(1) * 255)
+                blue = int(crapspace.getValue(i,j,mover+1).getprobamp(1) * 255)
+                bitcol = (red,green,blue) if crapspace.getValue(i,j,mover).observe() else (0,0,0)
                 pygame.draw.rect(screen,bitcol,(currx,curry,coordmultX,coordmultY))
 
         framecounter = font.render(str(mover), True, (255,0,0)) #for counting frames
@@ -223,6 +244,20 @@ def main():
             exit()
 
     setGlobalProperties()
+    thisfile = open('main.py', 'r')
+    rulefuncs = []
+    for line in thisfile.readlines():
+        if (len(line) > 2) and (line[:2] == "##"):
+            rulefuncs.append(line[2:-1])
+    thisfile.close()
+    rulefunc = None
+    while not (rulefunc in rulefuncs):
+        print("Pick Rule to Use:")
+        for possible in rulefuncs:
+            print(' ', possible)
+        rulefunc = input("Choose: ")
+    rulefunc = eval(rulefunc)
+
     #setting the initial state to random
     crapspace = chunkspace.ChunkSpace(VOXELS_X,VOXELS_Y,VOXELS_T,elementa.Adambit(0)) #create size of demiverse
     for i in range(crapspace.wide):
@@ -234,14 +269,14 @@ def main():
     loadtime = time()
     if '--mp' in sys.argv:
         halfwide = int(crapspace.wide / 2)
-        firsthalf = mp.Process(target=crapspace.applyRules,args=(conway,True,(0,halfwide),None,))
+        firsthalf = mp.Process(target=crapspace.applyRules,args=(rulefunc,True,(0,halfwide),None,))
         firsthalf.start()
-        crapspace.applyRules(conway,True,(halfwide,crapspace.wide),None)
+        crapspace.applyRules(rulefunc,True,(halfwide,crapspace.wide),None)
         firsthalf.join()
     else:
-        crapspace.applyRules(conway,True,None,None)
+        crapspace.applyRules(rulefunc,True,None,None)
     loadtime = time() - loadtime
-    print("\nAll Loaded Up. And it only took", loadtime, "seconds!\n...jesus...")
+    print("\nAll Loaded Up. And it only took", loadtime, "seconds!")
 
     for i in range(len(sys.argv)):
         if (sys.argv[i] == '--save') and (len(sys.argv) >= (i+2)):

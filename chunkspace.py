@@ -91,11 +91,11 @@ class ChunkSpace:
                 pngArray.append([])
                 for x in range(self.wide):
                     if self.getValue(x,y,t).observe():
-                        pngArray[y].append(int(self.getValue(x,y,t).getprobamp(1) * 255))
                         pngArray[y].append(int(self.getValue(x,y,t-1).getprobamp(1) * 255))
+                        pngArray[y].append(int(self.getValue(x,y,t).getprobamp(1) * 255))
                         pngArray[y].append(int(self.getValue(x,y,t+1).getprobamp(1) * 255))
                     else:
-                        pngArray[y].append(int(self.getValue(x,y,t).getprobamp(0) * 255))
-                        pngArray[y].append(int(self.getValue(x,y,t).getprobamp(0) * 255))
-                        pngArray[y].append(int(self.getValue(x,y,t).getprobamp(0) * 255))
+                        pngArray[y].append(0)
+                        pngArray[y].append(0)
+                        pngArray[y].append(0)
             png.from_array(pngArray,'RGB').save(path + str(t) + ".png")

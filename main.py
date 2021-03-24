@@ -198,6 +198,154 @@ def displayFromChunks(crapspace):
         mover += movestep
     pygame.quit() #yo mama so fat
 
+def loaderScreen():
+    if pygame.get_sdl_version() < (2,0,0):
+        print("Loading Window requires SDL version 2.0 or greater")
+        return False
+    screendims = (500,500)
+    pygame.init()
+    screen = pygame.display.set_mode(screendims)
+    pygame.display.set_caption("Set Demiverse Properties")
+    ticker = pygame.time.Clock()
+    editfont = pygame.font.SysFont(None,30)
+    displayfont = pygame.font.SysFont(None,32)
+    pygame.key.start_text_input()
+    cursor  = ['|',60] #(cursor char,blinkrate)
+    submitButton = displayfont.render("Submit",True,(0,0,0))
+    submitBound = submitButton.get_rect()
+    submitBound.y = screendims[1] - (submitBound.h + 10)
+    submitBound.x = int(screendims[0] / 2) - int(submitBound.w / 2)
+    blinker = 1
+    blinkflag = False
+    preInputText = ""
+    postInputText = ""
+    errorText = ""
+    errorFlag = False
+    errortime = 3
+    errorframes = 0
+    prompts = ["Screen Height (px) ",
+    "Screen Width (px)  ",
+    "Chunk Height (px)  ",
+    "Chunk Width (px)   ",
+    "Framerate (fps)     ",
+    "Duration (sec)       "]
+    flatPrompts = ["screen_height","screen_width","chunk_height","chunk_width","framerate","duration"]
+    promptLabels = []
+
+    for i, prompt in enumerate(prompts):
+        promptLabel = displayfont.render(prompt,True,(0,0,0))
+        inputx = promptLabel.get_width() + 5
+        inputy = int((i * screendims[1]) / len(prompts)) + 10
+        inputw = screendims[0] - inputx - 5
+        inputh = promptLabel.get_height()
+        promptLabels.append([promptLabel,pygame.Rect(inputx,inputy,inputw,inputh),""])
+
+    focus_i = 0
+    focus = promptLabels[focus_i][1].inflate(-5,-5)
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                return False
+            if (event.type == pygame.KEYDOWN) and (event.key == pygame.K_BACKSPACE):
+                if len(preInputText) > 0:
+                    preInputText = preInputText[:-1]
+                continue
+            if (event.type == pygame.KEYDOWN) and (event.key == pygame.K_DELETE):
+                if len(postInputText) > 0:
+                    postInputText = postInputText[1:]
+                continue
+            if (event.type == pygame.KEYDOWN) and (event.key == pygame.K_TAB):
+                promptLabels[focus_i][2] = preInputText + postInputText
+                focus_i = 0 if focus_i >= (len(promptLabels) - 1) else focus_i + 1
+                focus = promptLabels[focus_i][1].inflate(-5,-5)
+                preInputText = promptLabels[focus_i][2]
+                postInputText = ""
+                continue
+            if (event.type == pygame.MOUSEBUTTONUP) and (submitBound.collidepoint(event.pos)):
+                promptLabels[focus_i][2] = preInputText + postInputText
+                try:
+                    retval = []
+                    for i, label in enumerate(promptLabels):
+                        retval.append((flatPrompts[i],int(label[2])))
+                    retval = dict(retval)
+                    pygame.quit()
+                    return retval
+                except:
+                    errorText = "Not all values are numeric, try again"
+                    errorFlag = True
+                    errorframes = errortime * 60
+            if event.type == pygame.MOUSEBUTTONUP:
+                for i,label in enumerate(promptLabels):
+                    if label[1].collidepoint(event.pos):
+                        promptLabels[focus_i][2] = preInputText + postInputText
+                        focus_i = i
+                        focus = promptLabels[focus_i][1].inflate(-5,-5)
+                        preInputText = promptLabels[focus_i][2]
+                        postInputText = ""
+                continue
+            if (event.type == pygame.KEYDOWN) and ((event.key == pygame.K_LEFT) or event.key == pygame.K_RIGHT):
+                if event.key == pygame.K_RIGHT:
+                    if len(postInputText) > 0:
+                        preInputText = preInputText + postInputText[0]
+                        postInputText = postInputText[1:]
+                else:
+                    if len(preInputText) > 0:
+                        postInputText = preInputText[-1] + postInputText
+                        preInputText = preInputText[:-1]
+                continue
+            if (event.type == pygame.KEYDOWN) and (event.key == pygame.K_HOME):
+                postInputText = preInputText + postInputText
+                preInputText = ""
+                continue
+            if (event.type == pygame.KEYDOWN) and (event.key == pygame.K_END):
+                preInputText = preInputText + postInputText
+                postInputText = ""
+                continue
+            if event.type == pygame.TEXTINPUT:
+                preInputText += event.text
+
+        screen.fill((100,125,150))
+        for promptLabel in promptLabels:
+            screen.blit(promptLabel[0], (0,promptLabel[1][1]))
+            pygame.draw.rect(screen,(0,0,0),promptLabel[1].inflate(4,4))
+            pygame.draw.rect(screen,(255,255,255),promptLabel[1])
+
+        pygame.draw.rect(screen,(0,0,0),submitBound.inflate(5,5))
+        pygame.draw.rect(screen,(200,200,200),submitBound)
+        screen.blit(submitButton,submitBound)
+
+        if (cursor[1] % blinker) == 0:
+                blinkflag = not blinkflag
+
+        preEditText = editfont.render(preInputText,True,(0,0,0))
+        postEditText = editfont.render(postInputText,True,(0,0,0))
+        for i,label in enumerate(promptLabels):
+            if focus_i == i:
+                screen.blit(preEditText,focus)
+                if blinkflag:
+                    cursorText = editfont.render(cursor[0],True,(0,0,0))
+                    screen.blit(cursorText,(preEditText.get_rect().right+focus.x-2,focus.y))
+                screen.blit(postEditText,(preEditText.get_rect().right+focus.x,focus.y))
+            else:
+                screen.blit(editfont.render(label[2],True,(0,0,0)),label[1].inflate(-5,-5))
+        if errorFlag:
+            errorDisplay = displayfont.render(errorText,True,(255,0,0))
+            errorRect = errorDisplay.get_rect()
+            errorRect.x = 0
+            errorRect.y = screendims[1] - errorRect.h
+            pygame.draw.rect(screen,(255,240,240),errorRect)
+            screen.blit(errorDisplay,errorRect)
+        errorframes = 0 if errorframes <= 0 else errorframes - 1
+        errorFlag = errorframes != 0
+        pygame.display.flip()
+        blinker = blinker + 1 if blinker <= cursor[1] else 1
+        ticker.tick(60)
+
+    pygame.quit()
+    return False
+
 def setGlobalProperties(fromchunks=True):
     global SCREEN_WIDTH
     SCREEN_WIDTH = int(input("Screen Width?: "))
@@ -227,6 +375,15 @@ def setGlobalProperties(fromchunks=True):
         VOXELS_T = tsize
     print("...loading window...")
 
+def setGlobalsFromDict(indick):
+    global SCREEN_WIDTH, SCREEN_HEIGHT, VOXELS_T, VOXELS_X, VOXELS_Y, FRAME_RATE
+    SCREEN_WIDTH = indick["screen_width"]
+    SCREEN_HEIGHT = indick["screen_height"]
+    VOXELS_X = int(SCREEN_WIDTH / indick["chunk_width"])
+    VOXELS_Y = int(SCREEN_HEIGHT / indick["chunk_height"])
+    FRAME_RATE = indick["framerate"]
+    VOXELS_T = indick["duration"] * FRAME_RATE
+
 def main():
     if '--help' in sys.argv:
         print(HELP)
@@ -245,7 +402,7 @@ def main():
             displayFromPng(loadPngArray(argpath))
             exit()
 
-    setGlobalProperties()
+    setGlobalsFromDict(loaderScreen())
     thisfile = open('main.py', 'r')
     rulefuncs = []
     for line in thisfile.readlines():
